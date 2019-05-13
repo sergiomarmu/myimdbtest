@@ -6,8 +6,8 @@ import java.util.Collections.emptyList
 
 class SearchResponse private constructor(
         @field:SerializedName("Response")
-        private val response: String)
-{
+        private val response: String) {
+
     companion object {
         private val POSITIVE_RESPONSE = "True"
     }
