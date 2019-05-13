@@ -3,6 +3,8 @@ package com.vp.list;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,11 +20,13 @@ import dagger.android.support.HasSupportFragmentInjector;
 
 public class MovieListActivity extends AppCompatActivity implements HasSupportFragmentInjector {
     private static final String IS_SEARCH_VIEW_ICONIFIED = "is_search_view_iconified";
+    private static final String IS_ANY_QUERY_PENDING = "is_any_query_pending";
 
     @Inject
     DispatchingAndroidInjector<Fragment> dispatchingActivityInjector;
     private SearchView searchView;
     private boolean searchViewExpanded = true;
+    private String queryPending = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +41,8 @@ public class MovieListActivity extends AppCompatActivity implements HasSupportFr
                     .commit();
         } else {
             searchViewExpanded = savedInstanceState.getBoolean(IS_SEARCH_VIEW_ICONIFIED);
+            //3
+            queryPending = savedInstanceState.getString(IS_ANY_QUERY_PENDING);
         }
     }
 
@@ -59,9 +65,13 @@ public class MovieListActivity extends AppCompatActivity implements HasSupportFr
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                //3
+                queryPending = newText;
                 return false;
             }
         });
+
+        isAnyQueryPending();
 
         return true;
     }
@@ -70,10 +80,18 @@ public class MovieListActivity extends AppCompatActivity implements HasSupportFr
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(IS_SEARCH_VIEW_ICONIFIED, searchView.isIconified());
+        //3
+        outState.putString(IS_ANY_QUERY_PENDING, queryPending);
     }
 
     @Override
     public AndroidInjector<Fragment> supportFragmentInjector() {
         return dispatchingActivityInjector;
+    }
+
+    private void isAnyQueryPending() {
+        if (queryPending != null && !queryPending.isEmpty()) {
+            searchView.setQuery(queryPending, false);
+        }
     }
 }

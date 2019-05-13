@@ -24,11 +24,13 @@ import com.vp.list.viewmodel.ListViewModel;
 
 import javax.inject.Inject;
 
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import dagger.android.support.AndroidSupportInjection;
 
 public class ListFragment extends Fragment implements GridPagingScrollListener.LoadMoreItemsListener, ListAdapter.OnItemClickListener {
     public static final String TAG = "ListFragment";
     private static final String CURRENT_QUERY = "current_query";
+    private static final String IMDB_ID_PARAM = "imdbID=";
 
     @Inject
     ViewModelProvider.Factory factory;
@@ -41,6 +43,7 @@ public class ListFragment extends Fragment implements GridPagingScrollListener.L
     private ProgressBar progressBar;
     private TextView errorTextView;
     private String currentQuery = "Interview";
+    private SwipeRefreshLayout swipeRefreshLayoutList;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,6 +65,7 @@ public class ListFragment extends Fragment implements GridPagingScrollListener.L
         viewAnimator = view.findViewById(R.id.viewAnimator);
         progressBar = view.findViewById(R.id.progressBar);
         errorTextView = view.findViewById(R.id.errorText);
+        swipeRefreshLayoutList = view.findViewById(R.id.swiperefreshList);
 
         if (savedInstanceState != null) {
             currentQuery = savedInstanceState.getString(CURRENT_QUERY);
@@ -75,6 +79,15 @@ public class ListFragment extends Fragment implements GridPagingScrollListener.L
             }
         });
         listViewModel.searchMoviesByTitle(currentQuery, 1);
+
+        swipeRefreshLayoutList.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                listViewModel.searchMoviesByTitle(currentQuery, 1);
+                swipeRefreshLayoutList.setRefreshing(false);
+            }
+        });
+
         showProgressBar();
     }
 
@@ -164,6 +177,12 @@ public class ListFragment extends Fragment implements GridPagingScrollListener.L
 
     @Override
     public void onItemClick(String imdbID) {
-        //TODO handle click events
+        startActivity(DetailMovie(imdbID));
+    }
+
+    private Intent DetailMovie(String imdbID) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("app://movies/detail?" + IMDB_ID_PARAM + imdbID));
+        intent.setPackage(requireContext().getPackageName());
+        return intent;
     }
 }
