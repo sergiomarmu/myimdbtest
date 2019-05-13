@@ -82,8 +82,11 @@ class DetailActivity : DaggerAppCompatActivity(), QueryProvider {
     }
 
     fun setMenuValue(itemMenu: MenuItem) {
-        if (isAddedToDB())
+        if (isAddedToDB()) {
             itemMenu?.setIcon(R.drawable.ic_star_white)
+            itemMenu?.isChecked = true
+        }
+
     }
 
     fun isAddedToDB(): Boolean {
